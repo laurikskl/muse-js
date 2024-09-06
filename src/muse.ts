@@ -1,5 +1,5 @@
-import { BehaviorSubject, fromEvent, merge, Observable, Subject } from 'rxjs';
-import { filter, first, map, share, take } from 'rxjs/operators';
+import { BehaviorSubject, merge, Observable, Subject, EMPTY } from 'rxjs';
+import { filter , map, share, take, tap, catchError } from 'rxjs/operators';
 
 import {
     AccelerometerData,
@@ -78,6 +78,7 @@ export class MuseClient {
     eventMarkers: Subject<EventMarker>;
 
     private gatt: BluetoothRemoteGATTServer | null = null;
+    private device: BluetoothDevice | null = null;
     private controlChar: BluetoothRemoteGATTCharacteristic;
     private eegCharacteristics: BluetoothRemoteGATTCharacteristic[];
     private ppgCharacteristics: BluetoothRemoteGATTCharacteristic[];
@@ -89,20 +90,29 @@ export class MuseClient {
         if (gatt) {
             this.gatt = gatt;
         } else {
-            const device = await navigator.bluetooth.requestDevice({
+            this.device = await navigator.bluetooth.requestDevice({
                 filters: [{ services: [MUSE_SERVICE] }],
             });
-            this.gatt = await device.gatt!.connect();
+            this.gatt = await this.device.gatt!.connect();
         }
         this.deviceName = this.gatt.device.name || null;
+            
+        await this.initializeServicesAndCharacteristics();
+    }
 
-        const service = await this.gatt.getPrimaryService(MUSE_SERVICE);
-        fromEvent(this.gatt.device, 'gattserverdisconnected')
-            .pipe(first())
-            .subscribe(() => {
-                this.gatt = null;
-                this.connectionStatus.next(false);
-            });
+    private async onDisconnected() {
+        this.connectionStatus.next(false);
+        this.gatt = await this.device!.gatt!.connect();
+        await this.initializeServicesAndCharacteristics();
+    }
+
+    async initializeServicesAndCharacteristics() {
+
+        if (!this.gatt) {
+            throw new Error('GATT server is not connected');
+        }
+        this.gatt.device.addEventListener('gattserverdisconnected', this.onDisconnected.bind(this));
+        const service = await this.gatt!.getPrimaryService(MUSE_SERVICE);
 
         // Control
         this.controlChar = await service.getCharacteristic(CONTROL_CHARACTERISTIC);
@@ -172,11 +182,21 @@ export class MuseClient {
                             timestamp: this.getTimestamp(eventIndex, EEG_SAMPLES_PER_READING, EEG_FREQUENCY),
                         };
                     }),
+                    catchError((error) => {
+                        return EMPTY;
+                    })
                 ),
             );
             this.eegCharacteristics.push(eegChar);
         }
-        this.eegReadings = merge(...eegObservables);
+
+        this.eegReadings = merge(...eegObservables).pipe(
+            tap((reading) => console.log('EEG Reading:', reading)),
+            catchError((error) => {
+                return EMPTY;
+            }),
+            share()
+        );
         this.connectionStatus.next(true);
     }
 

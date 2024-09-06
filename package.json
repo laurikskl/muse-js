@@ -3,6 +3,7 @@
   "version": "3.3.0",
   "description": "Muse 2016 EEG Headset JavaScript Library",
   "main": "dist/muse.js",
+  "type": "module",
   "typings": "dist/muse.d.ts",
   "repository": "https://github.com/urish/muse-js",
   "author": "Uri Shaked <uri@codemagic.co.il>",
