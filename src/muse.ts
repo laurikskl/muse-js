@@ -1,5 +1,5 @@
 import { BehaviorSubject, merge, Observable, Subject, EMPTY } from 'rxjs';
-import { filter , map, share, take, tap, catchError } from 'rxjs/operators';
+import { filter , map, share, take, tap, catchError } from 'rxjs/operators/index.js';
 
 import {
     AccelerometerData,

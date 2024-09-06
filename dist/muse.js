@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import { BehaviorSubject, merge, Subject, EMPTY } from 'rxjs';
-import { filter, map, share, take, tap, catchError } from 'rxjs/operators';
+import { filter, map, share, take, tap, catchError } from 'rxjs/operators/index.js';
 import { decodeEEGSamples, decodePPGSamples, parseAccelerometer, parseControl, parseGyroscope, parseTelemetry, } from './lib/muse-parse';
 import { decodeResponse, encodeCommand, observableCharacteristic } from './lib/muse-utils';
 export { zipSamples } from './lib/zip-samples';
