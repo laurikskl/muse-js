@@ -191,7 +191,6 @@ export class MuseClient {
         }
 
         this.eegReadings = merge(...eegObservables).pipe(
-            tap((reading) => console.log('EEG Reading:', reading)),
             catchError((error) => {
                 return EMPTY;
             }),

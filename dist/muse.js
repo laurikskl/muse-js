@@ -34,7 +34,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 import { BehaviorSubject, merge, Subject, EMPTY } from 'rxjs';
-import { filter, map, share, take, tap, catchError } from 'rxjs/operators/index.js';
+import { filter, map, share, take, catchError } from 'rxjs/operators/index.js';
 import { decodeEEGSamples, decodePPGSamples, parseAccelerometer, parseControl, parseGyroscope, parseTelemetry, } from './lib/muse-parse';
 import { decodeResponse, encodeCommand, observableCharacteristic } from './lib/muse-utils';
 export { zipSamples } from './lib/zip-samples';
@@ -263,7 +263,7 @@ var MuseClient = /** @class */ (function () {
                         channelIndex++;
                         return [3 /*break*/, 15];
                     case 18:
-                        this.eegReadings = merge.apply(void 0, eegObservables).pipe(tap(function (reading) { return console.log('EEG Reading:', reading); }), catchError(function (error) {
+                        this.eegReadings = merge.apply(void 0, eegObservables).pipe(catchError(function (error) {
                             return EMPTY;
                         }), share());
                         this.connectionStatus.next(true);
