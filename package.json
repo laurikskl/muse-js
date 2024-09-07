@@ -10,6 +10,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "prepare": "npm run build",
     "format": "prettier --write src/**.ts **/*.json",
     "precommit": "lint-staged",
     "prepublish": "npm run build",
